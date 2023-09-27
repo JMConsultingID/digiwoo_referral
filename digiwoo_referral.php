@@ -48,7 +48,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
     function digiwoo_referral_settings_page() {
         if (isset($_POST['digiwoo_referral_status'])) {
             update_option('digiwoo_referral_enabled', sanitize_text_field($_POST['digiwoo_referral_status']));
-            update_option('digiwoo_cookie_enable', intval($_POST['digiwoo_cookie_enable']));
+            update_option('digiwoo_cookie_enable', sanitize_text_field($_POST['digiwoo_cookie_enable']));
             update_option('digiwoo_cookie_duration', intval($_POST['digiwoo_cookie_duration']));
         }
 
