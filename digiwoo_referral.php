@@ -148,7 +148,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             }
         }
 
-        add_action('woocommerce_order_status_completed', 'save_ref_id_actions_after_completion', 10, 4);
+        add_action('woocommerce_order_status_completed', 'save_ref_id_actions_after_completion');
 
 
  
