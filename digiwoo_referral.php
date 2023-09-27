@@ -147,11 +147,13 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             $order = wc_get_order( $order_id );
             $user_id = $order->get_user_id();
 
-            if ( WC()->session->__isset('ref_id') ) {
-                $ref_id = WC()->session->get('ref_id');
+            // Fetch ref_id from order meta
+            $ref_id = get_post_meta( $order_id, 'referral_id_order', true );
 
-                // Set referral ID as 'referral_id_completed'
+            // If the ref_id is available in the order meta, save it to the user meta
+            if (!empty($ref_id)) {
                 update_user_meta($user_id, 'referral_id_completed', $ref_id);
+                update_post_meta( $order_id, 'referral_id_completed', $ref_id);
             }
         }
         add_action('woocommerce_order_status_completed', 'save_ref_id_to_user_meta_after_completion');
