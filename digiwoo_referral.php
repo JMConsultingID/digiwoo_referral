@@ -91,28 +91,31 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         <?php
     }
 
-    if (get_option('digiwoo_referral_enabled') === 'yes') {        
-        // 1. Set the Referral ID in WooCommerce Session and Cookies
+    if (get_option('digiwoo_referral_enabled') === 'yes') {
+        define('REF_COOKIE', 'used_ref_id');        
         $cookie_enable = get_option('digiwoo_cookie_enable', 'no');
         if ($cookie_enable==='no') {
             return;
         }
 
+        // 1. Set the Referral ID in WooCommerce Session and Cookies
         function set_ref_id_in_session() {
             if (isset($_GET['_ref'])) {
-                WC()->session->set('ref_id', sanitize_text_field($_GET['_ref']));
                 $ref_id = sanitize_text_field($_GET['_ref']);
-                $cookie_duration = get_option('digiwoo_cookie_duration', 365);
-                $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60); 
-                setcookie('used_ref_id', $ref_id, $cookie_expiry, "/", "", is_ssl(), true);
+                if (!isset($_COOKIE[REF_COOKIE])) {
+                    WC()->session->set('ref_id', $ref_id);                
+                    $cookie_duration = get_option('digiwoo_cookie_duration', 365);
+                    $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60); 
+                    setcookie(REF_COOKIE, $ref_id, $cookie_expiry, "/", "", is_ssl(), true);
+                }
             }
         }
         add_action('init', 'set_ref_id_in_session', 10);
 
         // 2. Capture the Referral ID from the URL
         function get_referral_id_from_url() {
-            if (isset($_COOKIE['used_ref_id']) && !empty($_COOKIE['used_ref_id'])) {
-                return sanitize_text_field( $_COOKIE['used_ref_id'] ); 
+            if (isset($_COOKIE[REF_COOKIE]) && !empty($_COOKIE[REF_COOKIE])) {
+                return sanitize_text_field( $_COOKIE[REF_COOKIE] ); 
             } elseif( isset($_GET['_ref']) && !empty($_GET['_ref'])) {
                 return sanitize_text_field( $_GET['_ref'] );
             }
