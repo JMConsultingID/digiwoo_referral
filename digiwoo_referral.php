@@ -144,7 +144,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         function check_ref_cookie_on_checkout() {
             $cookie_enable = get_option('digiwoo_cookie_enable', 'no');
 
-            if ($cookie_enable==='yes')
+            if ($cookie_enable==='yes') {
                 if (isset($_GET['_ref']) && isset($_COOKIE['used_ref_id'])) {
                     $ref_id = sanitize_text_field($_GET['_ref']);
                     if ($_COOKIE['used_ref_id'] == $ref_id) {                    
