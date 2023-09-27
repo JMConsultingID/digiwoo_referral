@@ -173,9 +173,9 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
                     if ($('.woocommerce-checkout').length) {
                         // Disable the form inputs, textareas, and buttons
                         $('form.checkout.woocommerce-checkout.sellkit-checkout-virtual-session').find('input, textarea, button').prop('disabled', true);
-                        
-                        // Add a message for clarity
-                        $('form.checkout.woocommerce-checkout.sellkit-checkout-virtual-session').prepend('<div class="woocommerce-error">Checkout has been disabled due to previous usage of the referral code.</div>');
+
+                        // Hide the payment section
+                        $('.woocommerce-checkout-payment').css('display', 'none');
                     }
                 });
             </script>
