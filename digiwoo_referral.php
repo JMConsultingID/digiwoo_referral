@@ -48,10 +48,12 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
     function digiwoo_referral_settings_page() {
         if (isset($_POST['digiwoo_referral_status'])) {
             update_option('digiwoo_referral_enabled', sanitize_text_field($_POST['digiwoo_referral_status']));
+            update_option('digiwoo_cookie_enable', intval($_POST['digiwoo_cookie_enable']));
             update_option('digiwoo_cookie_duration', intval($_POST['digiwoo_cookie_duration']));
         }
 
         $current_status = get_option('digiwoo_referral_enabled', 'no');
+        $cookie_enable = get_option('digiwoo_cookie_enable', 'no');
         $cookie_duration = get_option('digiwoo_cookie_duration', 365);  // Defaulting to 365 days if not set
         ?>
         <div class="wrap">
@@ -64,6 +66,15 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
                             <select name="digiwoo_referral_status">
                                 <option value="yes" <?php selected($current_status, 'yes'); ?>>Enable</option>
                                 <option value="no" <?php selected($current_status, 'no'); ?>>Disable</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row">Enable Cookies</th>
+                        <td>
+                            <select name="digiwoo_cookie_enable">
+                                <option value="yes" <?php selected($cookie_enable, 'yes'); ?>>Enable</option>
+                                <option value="no" <?php selected($cookie_enable, 'no'); ?>>Disable</option>
                             </select>
                         </td>
                     </tr>
@@ -131,13 +142,17 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 
           // 6. Checking the Cookie on Checkout
         function check_ref_cookie_on_checkout() {
-            if (isset($_GET['_ref']) && isset($_COOKIE['used_ref_id'])) {
-                $ref_id = sanitize_text_field($_GET['_ref']);
-                if ($_COOKIE['used_ref_id'] == $ref_id) {                    
-                    // Add a notice to inform the user why the checkout is disabled
-                    wc_add_notice( __( 'Checkout is disabled because you have already used this referral ID.', 'woocommerce' ), 'error' );
-                    inject_disable_checkout_script();
+            $cookie_enable = get_option('digiwoo_cookie_enable', 'no');
 
+            if ($cookie_enable==='yes')
+                if (isset($_GET['_ref']) && isset($_COOKIE['used_ref_id'])) {
+                    $ref_id = sanitize_text_field($_GET['_ref']);
+                    if ($_COOKIE['used_ref_id'] == $ref_id) {                    
+                        // Add a notice to inform the user why the checkout is disabled
+                        wc_add_notice( __( 'Checkout is disabled because you have already used this referral ID.', 'woocommerce' ), 'error' );
+                        inject_disable_checkout_script();
+
+                    }
                 }
             }
         }
