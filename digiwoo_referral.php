@@ -91,15 +91,13 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 
         // 2. Set the Referral ID in WooCommerce Session
         function set_ref_id_in_session() {
-            session_start();            
+            WC()->session->set( 'test_ref_id', 'just_test' );
             if (isset($_GET['_ref'])) {
                 WC()->session->set('ref_id', sanitize_text_field($_GET['_ref']));
-                error_log("Session set: " . WC()->session->get('ref_id'));  // To log the session value
+                error_log("Session set: " . WC()->session->get('ref_id'));  // This logs the session value, you can check this in wp-content/debug.log
             }
         }
-        add_action('woocommerce_init', 'set_ref_id_in_session');
-
-
+        add_action('init', 'set_ref_id_in_session');
 
         // 3. Add Hidden Field to WooCommerce Checkout
         function add_hidden_referral_field_to_checkout( $checkout ) {
