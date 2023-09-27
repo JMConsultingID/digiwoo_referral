@@ -176,9 +176,9 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
                        jQuery('form.checkout.woocommerce-checkout.sellkit-checkout-virtual-session').find('input, textarea, button').prop('disabled', true);
                        // Hide the payment section
                         var paymentCheckInterval = setInterval(function() {
-                        if (jQuery('.woocommerce-checkout-payment').length) {
-                                // Hide the payment section using inline style
-                                jQuery('.woocommerce-checkout-payment').attr('style', 'display: none !important;');
+                            if ($('.woocommerce-checkout-payment').length) {
+                                // Add class 'hidden' to .woocommerce-checkout-payment
+                                $('.woocommerce-checkout-payment').addClass('hidden');
                                 clearInterval(paymentCheckInterval);  // Stop checking once the element is found and modified
                             }
                         }, 100);  // Check every 100ms
