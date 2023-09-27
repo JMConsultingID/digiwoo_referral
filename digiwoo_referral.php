@@ -80,7 +80,6 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         <?php
     }
 
-
     if (get_option('digiwoo_referral_enabled') === 'yes') {
         // 1. Capture the Referral ID from the URL
         function get_referral_id_from_url() {
@@ -124,17 +123,6 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         function set_cookie_after_order_completion( $order_id ) {
             if ( WC()->session->__isset('ref_id') ) {
                 $ref_id = WC()->session->get('ref_id');
-
-                // Set a cookie for 1 year
-                setcookie('used_ref_id', $ref_id, time() + (365 * 24 * 60 * 60), "/");
-            }
-        }
-        add_action('woocommerce_order_status_completed', 'set_cookie_after_order_completion');
-
-        // 6. Checking the Cookie on Checkout
-        function set_cookie_after_order_completion( $order_id ) {
-            if ( WC()->session->__isset('ref_id') ) {
-                $ref_id = WC()->session->get('ref_id');
                 $cookie_duration = get_option('digiwoo_cookie_duration', 365); // Defaulting to 365 days if not set
                 $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60); 
 
@@ -143,6 +131,15 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             }
         }
 
+        // 6. Checking the Cookie on Checkout
+        function check_ref_cookie_on_checkout() {
+            if (isset($_GET['_ref']) && isset($_COOKIE['used_ref_id'])) {
+                $ref_id = sanitize_text_field($_GET['_ref']);
+                if ($_COOKIE['used_ref_id'] == $ref_id) {
+                    wc_add_notice(__('Sorry, you cannot use this referral ID again.', 'woocommerce'), 'error');
+                }
+            }
+        }
         add_action('woocommerce_before_checkout_form', 'check_ref_cookie_on_checkout');
 
         // 7. Save the Referral ID to User Meta Upon Order Completion
