@@ -48,9 +48,11 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
     function digiwoo_referral_settings_page() {
         if (isset($_POST['digiwoo_referral_status'])) {
             update_option('digiwoo_referral_enabled', sanitize_text_field($_POST['digiwoo_referral_status']));
+            update_option('digiwoo_cookie_duration', intval($_POST['digiwoo_cookie_duration']));
         }
 
         $current_status = get_option('digiwoo_referral_enabled', 'no');
+        $cookie_duration = get_option('digiwoo_cookie_duration', 365);  // Defaulting to 365 days if not set
         ?>
         <div class="wrap">
             <h2>DigiWoo Referral Settings</h2>
@@ -63,6 +65,12 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
                                 <option value="yes" <?php selected($current_status, 'yes'); ?>>Enable</option>
                                 <option value="no" <?php selected($current_status, 'no'); ?>>Disable</option>
                             </select>
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row">Cookie Duration (Days)</th>
+                        <td>
+                            <input type="number" name="digiwoo_cookie_duration" value="<?php echo esc_attr($cookie_duration); ?>" min="1">
                         </td>
                     </tr>
                 </table>
@@ -124,14 +132,17 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         add_action('woocommerce_order_status_completed', 'set_cookie_after_order_completion');
 
         // 6. Checking the Cookie on Checkout
-        function check_ref_cookie_on_checkout() {
-            if (isset($_GET['_ref']) && isset($_COOKIE['used_ref_id'])) {
-                $ref_id = sanitize_text_field($_GET['_ref']);
-                if ($_COOKIE['used_ref_id'] == $ref_id) {
-                    wc_add_notice(__('Sorry, you cannot use this referral ID again.', 'woocommerce'), 'error');
-                }
+        function set_cookie_after_order_completion( $order_id ) {
+            if ( WC()->session->__isset('ref_id') ) {
+                $ref_id = WC()->session->get('ref_id');
+                $cookie_duration = get_option('digiwoo_cookie_duration', 365); // Defaulting to 365 days if not set
+                $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60); 
+
+                // Set a cookie based on the duration set in the settings
+                setcookie('used_ref_id', $ref_id, $cookie_expiry, "/");
             }
         }
+
         add_action('woocommerce_before_checkout_form', 'check_ref_cookie_on_checkout');
 
         // 7. Save the Referral ID to User Meta Upon Order Completion
