@@ -91,25 +91,33 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         <?php
     }
 
-    if (get_option('digiwoo_referral_enabled') === 'yes') {
-        // 1. Capture the Referral ID from the URL
-        function get_referral_id_from_url() {
-            if( isset($_GET['_ref']) ) {
-                return sanitize_text_field( $_GET['_ref'] );
-            }
-            return '';
+    if (get_option('digiwoo_referral_enabled') === 'yes') {        
+        // 1. Set the Referral ID in WooCommerce Session and Cookies
+        $cookie_enable = get_option('digiwoo_cookie_enable', 'no');
+        if ($cookie_enable==='no') {
+            return;
         }
 
-        // 2. Set the Referral ID in WooCommerce Session
         function set_ref_id_in_session() {
             if (isset($_GET['_ref'])) {
                 WC()->session->set('ref_id', sanitize_text_field($_GET['_ref']));
-                error_log("Session set: " . WC()->session->get('ref_id'));  // This logs the session value, you can check this in wp-content/debug.log
-                // Set a cookie based on the duration set in the settings
+                $ref_id = sanitize_text_field($_GET['_ref']);
+                $cookie_duration = get_option('digiwoo_cookie_duration', 365);
+                $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60); 
+                setcookie('used_ref_id', $ref_id, $cookie_expiry, "/", "", is_ssl(), true);
             }
         }
         add_action('init', 'set_ref_id_in_session', 10);
 
+        // 2. Capture the Referral ID from the URL
+        function get_referral_id_from_url() {
+            if (isset($_COOKIE['used_ref_id']) && !empty($_COOKIE['used_ref_id'])) {
+                return sanitize_text_field( $_COOKIE['used_ref_id'] ); 
+            } elseif( isset($_GET['_ref']) && !empty($_GET['_ref'])) {
+                return sanitize_text_field( $_GET['_ref'] );
+            }
+            return '';
+        }
 
         // 3. Add Hidden Field to WooCommerce Checkout
         function add_hidden_referral_field_to_checkout( $checkout ) {
@@ -128,58 +136,11 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         // 4. Save Referral ID as Order Meta
         function save_referral_id_in_order_meta( $order_id ) {
             if( !empty($_POST['_ref']) ) {
-                $ref_id = sanitize_text_field($_POST['_ref']);
-                $cookie_duration = get_option('digiwoo_cookie_duration', 365); // Defaulting to 365 days if not set
-                $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60); 
-
-                // Set a cookie based on the duration set in the settings
-                setcookie('used_ref_id', $ref_id, $cookie_expiry, "/", "", is_ssl(), true);
-                error_log("Cookie set: used_ref_id with value " . $ref_id);  // This logs the cookie value, you can check this in wp-content/debug.log
+                $ref_id = $_POST['_ref'];
                 update_post_meta( $order_id, 'referral_id_order', $ref_id );
             }
         }
         add_action('woocommerce_checkout_update_order_meta', 'save_referral_id_in_order_meta');
-
-          // 6. Checking the Cookie on Checkout
-        function check_ref_cookie_on_checkout() {
-            $cookie_enable = get_option('digiwoo_cookie_enable', 'no');
-
-            if ($cookie_enable==='yes') {
-                if (isset($_GET['_ref']) && isset($_COOKIE['used_ref_id'])) {
-                    $ref_id = sanitize_text_field($_GET['_ref']);
-                    if ($_COOKIE['used_ref_id'] == $ref_id) {                    
-                        // Add a notice to inform the user why the checkout is disabled
-                        wc_add_notice( __( 'Checkout is disabled because you have already used this referral ID.', 'woocommerce' ), 'error' );
-                        inject_disable_checkout_script();
-
-                    }
-                }
-            }
-        }
-        add_action('woocommerce_before_checkout_form', 'check_ref_cookie_on_checkout');
-
-        function inject_disable_checkout_script() {
-            ?>
-            <script type="text/javascript">
-                jQuery(document).ready(function($) {                   
-
-                    if (jQuery('.woocommerce-checkout').length) {
-                        // Disable the form inputs, textareas, and buttons
-                       jQuery('form.checkout.woocommerce-checkout.sellkit-checkout-virtual-session').find('input, textarea, button').prop('disabled', true);
-                       // Hide the payment section
-                        var paymentCheckInterval = setInterval(function() {
-                            if ($('.woocommerce-checkout-payment').length) {
-                                // Add class 'hidden' to .woocommerce-checkout-payment
-                                $('.woocommerce-checkout-payment').addClass('hidden');
-                                clearInterval(paymentCheckInterval);  // Stop checking once the element is found and modified
-                            }
-                        }, 1000);  // Check every 100ms
-                    }
-                });
-            </script>
-            <?php
-        }
-        
 
     }
 
