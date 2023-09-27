@@ -117,42 +117,19 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         // 4. Save Referral ID as Order Meta
         function save_referral_id_in_order_meta( $order_id ) {
             if( !empty($_POST['_ref']) ) {
-                update_post_meta( $order_id, 'referral_id_order', sanitize_text_field($_POST['_ref']) );
-            }
-        }
-        add_action('woocommerce_checkout_update_order_meta', 'save_referral_id_in_order_meta');
-
-        // 5. Save the Referral ID to User Meta Upon Order Completion
-        function save_ref_id_actions_after_completion( $order_id ) {
-            $order = wc_get_order( $order_id );
-            $ref_id = get_post_meta( $order_id, 'referral_id_order', true );
-
-            // If ref_id exists in order meta, continue
-            if ( !empty($ref_id) ) {
-                
-                // Save ref_id to user meta
-                $user_id = $order->get_user_id();
-                
-                if ( $user_id ) {
-                    update_user_meta($user_id, 'referral_id_completed', $ref_id);
-                    update_post_meta($order_id, 'referral_id_completed', $ref_id);
-                }
-
-                // Set a cookie based on ref_id
+                $ref_id = sanitize_text_field($_POST['_ref']);
                 $cookie_duration = get_option('digiwoo_cookie_duration', 365); // Defaulting to 365 days if not set
                 $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60); 
 
                 // Set a cookie based on the duration set in the settings
                 setcookie('used_ref_id', $ref_id, $cookie_expiry, "/", "", is_ssl(), true);
                 error_log("Cookie set: used_ref_id with value " . $ref_id);  // This logs the cookie value, you can check this in wp-content/debug.log
+                update_post_meta( $order_id, 'referral_id_order', $ref_id );
             }
         }
+        add_action('woocommerce_checkout_update_order_meta', 'save_referral_id_in_order_meta');
 
-        add_action('woocommerce_order_status_completed', 'save_ref_id_actions_after_completion');
-
-
- 
-        // 6. Checking the Cookie on Checkout
+          // 6. Checking the Cookie on Checkout
         function check_ref_cookie_on_checkout() {
             if (isset($_GET['_ref']) && isset($_COOKIE['used_ref_id'])) {
                 $ref_id = sanitize_text_field($_GET['_ref']);
