@@ -123,8 +123,21 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         }
         add_action('woocommerce_checkout_update_order_meta', 'save_referral_id_in_order_meta');
 
-        // 5. Set Cookie After Order Completion
-        function set_cookie_after_order_completion( $order_id ) {
+        // 5. Save the Referral ID to User Meta Upon Order Completion
+        function save_ref_id_actions_after_completion( $order_id ) {
+            // Save ref_id to user meta
+            if ( WC()->session->__isset('ref_id') ) {
+                $order = wc_get_order( $order_id );
+                $user_id = $order->get_user_id();
+                
+                if ( $user_id ) {
+                    $ref_id = WC()->session->get('ref_id');
+                    update_user_meta($user_id, 'referral_id_completed', $ref_id);
+                    update_post_meta( $order_id, 'referral_id_completed', $ref_id);
+                }
+            }
+
+            // Set a cookie based on ref_id
             if ( WC()->session->__isset('ref_id') ) {
                 $ref_id = WC()->session->get('ref_id');
                 $cookie_duration = get_option('digiwoo_cookie_duration', 365); // Defaulting to 365 days if not set
@@ -136,32 +149,29 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             }
         }
 
+        add_action('woocommerce_order_status_completed', 'save_ref_id_actions_after_completion');
+
+ 
         // 6. Checking the Cookie on Checkout
         function check_ref_cookie_on_checkout() {
             if (isset($_GET['_ref']) && isset($_COOKIE['used_ref_id'])) {
                 $ref_id = sanitize_text_field($_GET['_ref']);
                 if ($_COOKIE['used_ref_id'] == $ref_id) {
-                    wc_add_notice(__('Sorry, you cannot use this referral ID again.', 'woocommerce'), 'error');
+                    // Remove all checkout gateways, effectively disabling the checkout process
+                    add_filter('woocommerce_available_payment_gateways', 'disable_all_gateways');
+                    
+                    // Add a notice to inform the user why the checkout is disabled
+                    wc_add_notice( __( 'Checkout is disabled because you have already used this referral ID.', 'woocommerce' ), 'error' );
                 }
             }
         }
         add_action('woocommerce_before_checkout_form', 'check_ref_cookie_on_checkout');
 
-        // 7. Save the Referral ID to User Meta Upon Order Completion
-        function save_ref_id_to_user_meta_after_completion( $order_id ) {
-            $order = wc_get_order( $order_id );
-            $user_id = $order->get_user_id();
 
-            // Fetch ref_id from order meta
-            $ref_id = get_post_meta( $order_id, 'referral_id_order', true );
-
-            // If the ref_id is available in the order meta, save it to the user meta
-            if (!empty($ref_id)) {
-                update_user_meta($user_id, 'referral_id_completed', $ref_id);
-                update_post_meta( $order_id, 'referral_id_completed', $ref_id);
-            }
+        function disable_all_gateways($gateways) {
+            return array();
         }
-        add_action('woocommerce_order_status_completed', 'save_ref_id_to_user_meta_after_completion');
+
     }
 
 }
