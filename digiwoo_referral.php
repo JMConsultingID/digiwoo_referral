@@ -124,21 +124,21 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 
         // 5. Save the Referral ID to User Meta Upon Order Completion
         function save_ref_id_actions_after_completion( $order_id ) {
-            // Save ref_id to user meta
-            if ( WC()->session->__isset('ref_id') ) {
-                $order = wc_get_order( $order_id );
+            $order = wc_get_order( $order_id );
+            $ref_id = $order->get_meta('referral_id_order');
+
+            // If ref_id exists in order meta, continue
+            if ( !empty($ref_id) ) {
+                
+                // Save ref_id to user meta
                 $user_id = $order->get_user_id();
                 
                 if ( $user_id ) {
-                    $ref_id = WC()->session->get('ref_id');
                     update_user_meta($user_id, 'referral_id_completed', $ref_id);
-                    update_post_meta( $order_id, 'referral_id_completed', $ref_id);
+                    update_post_meta($order_id, 'referral_id_completed', $ref_id);
                 }
-            }
 
-            // Set a cookie based on ref_id
-            if ( WC()->session->__isset('ref_id') ) {
-                $ref_id = WC()->session->get('ref_id');
+                // Set a cookie based on ref_id
                 $cookie_duration = get_option('digiwoo_cookie_duration', 365); // Defaulting to 365 days if not set
                 $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60); 
 
@@ -149,6 +149,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         }
 
         add_action('woocommerce_order_status_completed', 'save_ref_id_actions_after_completion');
+
 
  
         // 6. Checking the Cookie on Checkout
