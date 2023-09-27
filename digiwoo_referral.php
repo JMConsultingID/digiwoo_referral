@@ -170,14 +170,13 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             ?>
             <script type="text/javascript">
                 jQuery(document).ready(function($) {
+                    // Hide the payment section
+                    jQuery('.woocommerce-checkout-payment').attr('style', 'display: none !important;');
+                    jQuery('.wc_payment_methods').attr('style', 'display: none !important;');
+
                     if (jQuery('.woocommerce-checkout').length) {
                         // Disable the form inputs, textareas, and buttons
                        jQuery('form.checkout.woocommerce-checkout.sellkit-checkout-virtual-session').find('input, textarea, button').prop('disabled', true);
-
-                        // Hide the payment section
-                        jQuery('.woocommerce-checkout-payment').attr('style', 'display: none !important;');
-                        jQuery('.wc_payment_methods').attr('style', 'display: none !important;');
-
                     }
                 });
             </script>
