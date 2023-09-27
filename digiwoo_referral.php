@@ -102,6 +102,10 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         function set_ref_id_in_session() {
             if (isset($_GET['_ref'])) {
                 $ref_id = sanitize_text_field($_GET['_ref']);
+                if (isset($_COOKIE['used_ref_id']) && $_COOKIE['used_ref_id'] !== $ref_id) {
+                    setcookie('used_ref_id', '', time() - 3600, "/", "", is_ssl(), true);
+                }
+
                 if (!isset($_COOKIE[REF_COOKIE])) {
                     WC()->session->set('ref_id', $ref_id);                
                     $cookie_duration = get_option('digiwoo_cookie_duration', 365);
