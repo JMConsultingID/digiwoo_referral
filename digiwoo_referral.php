@@ -156,21 +156,32 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         function check_ref_cookie_on_checkout() {
             if (isset($_GET['_ref']) && isset($_COOKIE['used_ref_id'])) {
                 $ref_id = sanitize_text_field($_GET['_ref']);
-                if ($_COOKIE['used_ref_id'] == $ref_id) {
-                    // Remove all checkout gateways, effectively disabling the checkout process
-                    add_filter('woocommerce_available_payment_gateways', 'disable_all_gateways');
-                    
+                if ($_COOKIE['used_ref_id'] == $ref_id) {                    
                     // Add a notice to inform the user why the checkout is disabled
                     wc_add_notice( __( 'Checkout is disabled because you have already used this referral ID.', 'woocommerce' ), 'error' );
+                    inject_disable_checkout_script();
+
                 }
             }
         }
         add_action('woocommerce_before_checkout_form', 'check_ref_cookie_on_checkout');
 
-
-        function disable_all_gateways($gateways) {
-            return array();
+        function inject_disable_checkout_script() {
+            ?>
+            <script type="text/javascript">
+                jQuery(document).ready(function($) {
+                    if ($('.woocommerce-checkout').length) {
+                        // Disable the form inputs, textareas, and buttons
+                        $('form.checkout.woocommerce-checkout.sellkit-checkout-virtual-session').find('input, textarea, button').prop('disabled', true);
+                        
+                        // Add a message for clarity
+                        $('form.checkout.woocommerce-checkout.sellkit-checkout-virtual-session').prepend('<div class="woocommerce-error">Checkout has been disabled due to previous usage of the referral code.</div>');
+                    }
+                });
+            </script>
+            <?php
         }
+        
 
     }
 
