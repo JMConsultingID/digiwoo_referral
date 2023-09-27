@@ -125,7 +125,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         // 5. Save the Referral ID to User Meta Upon Order Completion
         function save_ref_id_actions_after_completion( $order_id ) {
             $order = wc_get_order( $order_id );
-            $ref_id = $order->get_meta('referral_id_order');
+            $ref_id = get_post_meta( $order_id, 'referral_id_order', true );
 
             // If ref_id exists in order meta, continue
             if ( !empty($ref_id) ) {
@@ -148,7 +148,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             }
         }
 
-        add_action('woocommerce_order_status_completed', 'save_ref_id_actions_after_completion');
+        add_action('woocommerce_order_status_completed', 'save_ref_id_actions_after_completion', 10, 4);
 
 
  
