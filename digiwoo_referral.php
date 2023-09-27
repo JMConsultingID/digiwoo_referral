@@ -90,11 +90,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         }
 
         // 2. Set the Referral ID in WooCommerce Session
-        function set_ref_id_in_session() {
-            if (!session_id()) {
-                session_start();
-            }
-            
+        function set_ref_id_in_session() {            
             if (isset($_GET['_ref'])) {
                 WC()->session->set('ref_id', sanitize_text_field($_GET['_ref']));
                 error_log("Session set: " . WC()->session->get('ref_id'));  // This logs the session value, you can check this in wp-content/debug.log
