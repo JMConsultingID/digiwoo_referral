@@ -159,6 +159,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
                 if ($_COOKIE['used_ref_id'] == $ref_id) {                    
                     // Add a notice to inform the user why the checkout is disabled
                     wc_add_notice( __( 'Checkout is disabled because you have already used this referral ID.', 'woocommerce' ), 'error' );
+                    add_filter('woocommerce_available_payment_gateways', 'disable_all_payment_gateways');
                     inject_disable_checkout_script();
 
                 }
@@ -174,20 +175,16 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
                     if (jQuery('.woocommerce-checkout').length) {
                         // Disable the form inputs, textareas, and buttons
                        jQuery('form.checkout.woocommerce-checkout.sellkit-checkout-virtual-session').find('input, textarea, button').prop('disabled', true);
-                       // Hide the payment section
-                        var paymentCheckInterval = setInterval(function() {
-                            if ($('.woocommerce-checkout-payment').length) {
-                                // Add class 'hidden' to .woocommerce-checkout-payment
-                                $('.woocommerce-checkout-payment').addClass('hidden');
-                                clearInterval(paymentCheckInterval);  // Stop checking once the element is found and modified
-                            }
-                        }, 100);  // Check every 100ms
                     }
                 });
             </script>
             <?php
         }
-        
+
+        function disable_all_payment_gateways($available_gateways) {
+            return array(); // This will disable all available payment gateways
+        }
+                
 
     }
 
