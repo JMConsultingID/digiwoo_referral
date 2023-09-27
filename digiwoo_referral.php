@@ -171,7 +171,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             <script type="text/javascript">
                 jQuery(document).ready(function($) {
                     // Hide the payment section
-                    jQuery('#payment').css('display', 'none');
+                    $('#payment').attr('style', 'display: none !important;');
                     
                     if (jQuery('.woocommerce-checkout').length) {
                         // Disable the form inputs, textareas, and buttons
