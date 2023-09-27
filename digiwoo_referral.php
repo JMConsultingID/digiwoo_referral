@@ -46,20 +46,23 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
     }
 
     function digiwoo_referral_settings_page() {
-        if (isset($_POST['digiwoo_referral_enable'])) {
-            update_option('digiwoo_referral_enabled', 'yes');
-        } else {
-            update_option('digiwoo_referral_enabled', 'no');
+        if (isset($_POST['digiwoo_referral_status'])) {
+            update_option('digiwoo_referral_enabled', sanitize_text_field($_POST['digiwoo_referral_status']));
         }
+
+        $current_status = get_option('digiwoo_referral_enabled', 'no');
         ?>
         <div class="wrap">
             <h2>DigiWoo Referral Settings</h2>
             <form method="post">
                 <table class="form-table">
                     <tr valign="top">
-                        <th scope="row">Enable Referral System</th>
+                        <th scope="row">Referral System Status</th>
                         <td>
-                            <input type="checkbox" name="digiwoo_referral_enable" <?php checked(get_option('digiwoo_referral_enabled'), 'yes'); ?>>
+                            <select name="digiwoo_referral_status">
+                                <option value="yes" <?php selected($current_status, 'yes'); ?>>Enable</option>
+                                <option value="no" <?php selected($current_status, 'no'); ?>>Disable</option>
+                            </select>
                         </td>
                     </tr>
                 </table>
@@ -68,6 +71,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         </div>
         <?php
     }
+
 
     if (get_option('digiwoo_referral_enabled') === 'yes') {
         // 1. Capture the Referral ID from the URL
