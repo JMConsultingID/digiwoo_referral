@@ -92,7 +92,8 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
     }
 
     if (get_option('digiwoo_referral_enabled') === 'yes') {
-        define('REF_COOKIE', 'used_ref_id');        
+        define('REF_COOKIE', 'used_ref_id'); 
+        define('LID_COOKIE', 'used_lid_id');        
         $cookie_enable = get_option('digiwoo_cookie_enable', 'no');
         if ($cookie_enable==='no') {
             return;
@@ -116,6 +117,24 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         }
         add_action('init', 'set_ref_id_in_session', 10);
 
+        // 1. Set the Referral ID in WooCommerce Session and Cookies
+        function set_lid_id_in_session() {
+            if (isset($_GET['lid'])) {
+                $lid_id = sanitize_text_field($_GET['lid']);
+                if (isset($_COOKIE[LID_COOKIE]) && $_COOKIE[LID_COOKIE] !== $lid_id) {
+                    setcookie(LID_COOKIE, '', time() - 3600, "/", "", is_ssl(), true);
+                }
+
+                if (!isset($_COOKIE[LID_COOKIE])) {
+                    WC()->session->set('lid_id', $lid_id);                
+                    $cookie_duration = get_option('digiwoo_cookie_duration', 365);
+                    $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60); 
+                    setcookie(LID_COOKIE, $lid_id, $cookie_expiry, "/", "", is_ssl(), true);
+                }
+            }
+        }
+        add_action('init', 'set_lid_id_in_session', 10);
+
         // 2. Capture the Referral ID from the URL
         function get_referral_id_from_url() {
             if (isset($_COOKIE[REF_COOKIE]) && !empty($_COOKIE[REF_COOKIE])) {
@@ -128,7 +147,9 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 
         // 2. Capture the Referral ID from the URL
         function get_referral_lid_from_url() {
-            if( isset($_GET['lid']) && !empty($_GET['lid'])) {
+            if (isset($_COOKIE[LID_COOKIE]) && !empty($_COOKIE[LID_COOKIE])) {
+                return sanitize_text_field( $_COOKIE[LID_COOKIE] ); 
+            } elseif( isset($_GET['lid']) && !empty($_GET['lid'])) {
                 return sanitize_text_field( $_GET['lid'] );
             }
             return '';
