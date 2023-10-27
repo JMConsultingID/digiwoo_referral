@@ -126,18 +126,9 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             return '';
         }
 
-        // 2. Capture the Referral ID from the URL
-        function get_referral_lid_from_url() {
-            if( isset($_GET['lid']) && !empty($_GET['lid'])) {
-                return sanitize_text_field( $_GET['lid'] );
-            }
-            return '';
-        }
-
         // 3. Add Hidden Field to WooCommerce Checkout
         function add_hidden_referral_field_to_checkout( $checkout ) {
             $referral_id = get_referral_id_from_url();
-            $referral_lid = get_referral_lid_from_url()
 
             // Add a hidden field to the checkout
             woocommerce_form_field( '_ref', array(
@@ -146,14 +137,6 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
                 'label_class'   => array('hidden'),
                 'input_class'   => array('hidden'),
             ), $referral_id );
-
-            // Add a hidden field to the checkout
-            woocommerce_form_field( '_lid', array(
-                'type'          => 'hidden',
-                'class'         => array('referral-lid-hidden-field'),
-                'label_class'   => array('hidden'),
-                'input_class'   => array('hidden'),
-            ), $referral_lid );
         }
         add_action('woocommerce_after_checkout_billing_form', 'add_hidden_referral_field_to_checkout');
 
@@ -162,10 +145,6 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             if( !empty($_POST['_ref']) ) {
                 $ref_id = $_POST['_ref'];
                 update_post_meta( $order_id, 'referral_id_order', $ref_id );
-            }
-            if( !empty($_POST['_lid']) ) {
-                $lid_id = $_POST['_lid'];
-                update_post_meta( $order_id, 'referral_lid_order', $lid_id );
             }
         }
         add_action('woocommerce_checkout_update_order_meta', 'save_referral_id_in_order_meta');
