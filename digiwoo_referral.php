@@ -141,7 +141,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         // 2. Capture the Referral ID from the URL
         function get_marketing_params() {
             $params = [
-                '_ref'          => REF_COOKIE,
+                '_ref'         => REF_COOKIE,
                 'utm_source'   => UTM_SOURCE_COOKIE,
                 'utm_medium'   => UTM_MEDIUM_COOKIE,
                 'utm_term'     => UTM_TERM_COOKIE,
@@ -154,12 +154,9 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             $values = [];
 
             foreach ($params as $urlParam => $cookieName) {
-                // Check if the value is in the cookie first
                 if (isset($_COOKIE[$cookieName]) && !empty($_COOKIE[$cookieName])) {
                     $values[$urlParam] = sanitize_text_field($_COOKIE[$cookieName]);
-                }
-                // If not in cookie, check the URL parameter
-                elseif (isset($_GET[$urlParam]) && !empty($_GET[$urlParam])) {
+                } elseif (isset($_GET[$urlParam]) && !empty($_GET[$urlParam])) {
                     $values[$urlParam] = sanitize_text_field($_GET[$urlParam]);
                 } else {
                     $values[$urlParam] = '';
@@ -170,22 +167,23 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         }
 
 
+
         // 3. Add Hidden Field to WooCommerce Checkout
-        function add_hidden_marketing_fields_to_checkout( $checkout ) {
+        function add_hidden_marketing_fields_to_checkout($checkout) {
             $marketing_params = get_marketing_params();
 
-            // Loop through all marketing parameters and add them as hidden fields
             foreach ($marketing_params as $param => $value) {
-                woocommerce_form_field( $param, array(
+                woocommerce_form_field($param, array(
                     'type'          => 'hidden',
-                    'class'         => array($param . '-hidden-field form-hidden-field'),
+                    'class'         => array($param . '-hidden-field', 'form-hidden-field'),
                     'label_class'   => array('hidden'),
                     'input_class'   => array('hidden'),
-                ), $value );
+                ), $value);
             }
         }
 
-        add_action('woocommerce_after_checkout_billing_form', 'add_hidden_marketing_fields_to_checkout',60);
+        add_action('woocommerce_after_checkout_billing_form', 'add_hidden_marketing_fields_to_checkout');
+
 
 
         // 4. Save Referral ID as Order Meta
