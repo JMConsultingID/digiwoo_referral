@@ -154,10 +154,12 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             $values = [];
 
             foreach ($params as $urlParam => $cookieName) {
-                if (isset($_COOKIE[$cookieName]) && !empty($_COOKIE[$cookieName])) {
-                    $values[$urlParam] = sanitize_text_field($_COOKIE[$cookieName]);
-                } elseif (isset($_GET[$urlParam]) && !empty($_GET[$urlParam])) {
+                // Check the URL parameter first
+                if (isset($_GET[$urlParam]) && !empty($_GET[$urlParam])) {
                     $values[$urlParam] = sanitize_text_field($_GET[$urlParam]);
+                } elseif (isset($_COOKIE[$cookieName]) && !empty($_COOKIE[$cookieName])) {
+                    // Fallback to cookie value if URL parameter isn't set
+                    $values[$urlParam] = sanitize_text_field($_COOKIE[$cookieName]);
                 } else {
                     $values[$urlParam] = '';
                 }
