@@ -194,10 +194,11 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         // 4. Save Referral ID as Order Meta
         function save_marketing_params_in_order_meta( $order_id ) {
             $marketing_params = get_marketing_params();
+            $marketing_prefix = 'fdsc';
 
             foreach ($marketing_params as $param => $value) {
                 if (!empty($value)) {
-                    update_post_meta($order_id, $param . '_order', $value);
+                    update_post_meta($order_id, $marketing_prefix. '-' .$param . '_order', $value);
                 }
             }
         }
