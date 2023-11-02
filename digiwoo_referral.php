@@ -108,37 +108,34 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 
         // 1. Set the Referral ID in WooCommerce Session and Cookies
         function set_marketing_params_in_session() {
-            // List of all query parameters and their respective cookie names
-            $params = [
-                '_ref'        => REF_COOKIE,
-                'utm_source'  => UTM_SOURCE_COOKIE,
-                'utm_medium'  => UTM_MEDIUM_COOKIE,
-                'utm_term'    => UTM_TERM_COOKIE,
-                'utm_campaign'=> UTM_CAMPAIGN_COOKIE,
-                'utm_content' => UTM_CONTENT_COOKIE,
-                'cid'         => CID_COOKIE,
-                'lid'         => LID_COOKIE
+            $marketing_params = [
+                '_ref'         => REF_COOKIE,
+                'utm_source'   => UTM_SOURCE_COOKIE,
+                'utm_medium'   => UTM_MEDIUM_COOKIE,
+                'utm_term'     => UTM_TERM_COOKIE,
+                'utm_campaign' => UTM_CAMPAIGN_COOKIE,
+                'utm_content'  => UTM_CONTENT_COOKIE,
+                'cid'          => CID_COOKIE,
+                'lid'          => LID_COOKIE
             ];
 
-            foreach ($params as $param => $cookieName) {
-                if (isset($_GET[$param])) {
-                    $paramValue = sanitize_text_field($_GET[$param]);
+            $cookie_duration = get_option('digiwoo_cookie_duration', 365);
+            $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60);
 
-                    // If the cookie already exists and is different, reset it
-                    if (isset($_COOKIE[$cookieName]) && $_COOKIE[$cookieName] !== $paramValue) {
-                        setcookie($cookieName, '', time() - 3600, "/", "", is_ssl(), true);
-                    }
+            foreach ($marketing_params as $urlParam => $cookieName) {
+                if (isset($_GET[$urlParam])) {
+                    $newValue = sanitize_text_field($_GET[$urlParam]);
 
-                    // Set new cookie if it doesn't exist
-                    if (!isset($_COOKIE[$cookieName])) {
-                        $cookie_duration = get_option('digiwoo_cookie_duration', 365);
-                        $cookie_expiry = time() + ($cookie_duration * 24 * 60 * 60); 
-                        setcookie($cookieName, $paramValue, $cookie_expiry, "/", "", is_ssl(), true);
+                    // Set or update the cookie if the value is new or changed
+                    if (!isset($_COOKIE[$cookieName]) || $_COOKIE[$cookieName] !== $newValue) {
+                        setcookie($cookieName, $newValue, $cookie_expiry, "/", "", is_ssl(), true);
                     }
                 }
             }
         }
+
         add_action('init', 'set_marketing_params_in_session', 10);
+
 
 
         // 2. Capture the Referral ID from the URL
