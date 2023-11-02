@@ -144,7 +144,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         // 2. Capture the Referral ID from the URL
         function get_marketing_params() {
             $params = [
-                'ref'          => REF_COOKIE,
+                '_ref'          => REF_COOKIE,
                 'utm_source'   => UTM_SOURCE_COOKIE,
                 'utm_medium'   => UTM_MEDIUM_COOKIE,
                 'utm_term'     => UTM_TERM_COOKIE,
