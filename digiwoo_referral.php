@@ -162,7 +162,6 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
                 // Check if the value is in the cookie               
                 elseif (isset($_COOKIE[$cookieName]) && !empty($_COOKIE[$cookieName])) {
                     $values[$urlParam] = sanitize_text_field($_COOKIE[$cookieName]);
-                    return;
                 }else {
                     $values[$urlParam] = '';
                 }
