@@ -93,7 +93,14 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 
     if (get_option('digiwoo_referral_enabled') === 'yes') {
         define('REF_COOKIE', 'used_ref_id'); 
-        define('LID_COOKIE', 'used_lid_id');        
+        define('LID_COOKIE', 'used_lid_id');  
+        define('CID_COOKIE', 'used_cid_id');
+        define('UTM_SOURCE_COOKIE', 'used_utm_source_id');
+        define('UTM_MEDIUM_COOKIE', 'used_utm_medium_id');
+        define('UTM_TERM_COOKIE', 'used_utm_term_id');
+        define('UTM_CAMPAIGN_COOKIE', 'used_utm_campaign_id');
+        define('UTM_CONTENT_COOKIE', 'used_utm_content_id');
+    
         $cookie_enable = get_option('digiwoo_cookie_enable', 'no');
         if ($cookie_enable==='no') {
             return;
