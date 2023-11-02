@@ -185,7 +185,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             }
         }
 
-        add_action('woocommerce_after_checkout_billing_form', 'add_hidden_marketing_fields_to_checkout');
+        add_action('woocommerce_after_checkout_billing_form', 'add_hidden_marketing_fields_to_checkout',60);
 
 
         // 4. Save Referral ID as Order Meta
