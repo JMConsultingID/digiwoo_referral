@@ -181,7 +181,7 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
             foreach ($marketing_params as $param => $value) {
                 woocommerce_form_field( $param, array(
                     'type'          => 'hidden',
-                    'class'         => array($param . '-hidden-field'),
+                    'class'         => array($param . '-hidden-field form-hidden-field'),
                     'label_class'   => array('hidden'),
                     'input_class'   => array('hidden'),
                 ), $value );
