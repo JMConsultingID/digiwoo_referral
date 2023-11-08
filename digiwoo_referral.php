@@ -191,13 +191,41 @@ if ( in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
         // 4. Save Referral ID as Order Meta
         function save_marketing_params_in_order_meta( $order_id ) {
             $marketing_params = get_marketing_params();
-            $marketing_prefix = 'fdsc';
-
-            foreach ($marketing_params as $param => $value) {
-                if (!empty($value)) {
-                    update_post_meta($order_id, $marketing_prefix. '-' .$param . '_order', $value);
-                }
+            
+            // Save the referral ID with a custom meta key
+            if (!empty($marketing_params['_ref'])) {
+                update_post_meta($order_id, 'referral_id_order', $marketing_params['_ref']);
             }
+
+            // Save the UTM source with a different meta key
+            if (!empty($marketing_params['lid'])) {
+                update_post_meta($order_id, 'referral_lid_order', $marketing_params['lid']);
+            }
+
+            if (!empty($marketing_params['cid'])) {
+                update_post_meta($order_id, 'referral_cid_order', $marketing_params['cid']);
+            }
+
+            if (!empty($marketing_params['utm_source'])) {
+                update_post_meta($order_id, 'referral_utm_source_order', $marketing_params['utm_source']);
+            }
+
+            if (!empty($marketing_params['utm_medium'])) {
+                update_post_meta($order_id, 'referral_utm_medium_order', $marketing_params['utm_medium']);
+            }
+
+            if (!empty($marketing_params['utm_term'])) {
+                update_post_meta($order_id, 'referral_utm_term_order', $marketing_params['utm_term']);
+            }
+
+            if (!empty($marketing_params['utm_campaign'])) {
+                update_post_meta($order_id, 'referral_utm_campaign_order', $marketing_params['utm_campaign']);
+            }
+
+            if (!empty($marketing_params['utm_content'])) {
+                update_post_meta($order_id, 'referral_utm_content_order', $marketing_params['utm_content']);
+            }
+            
         }
 
         add_action('woocommerce_checkout_update_order_meta', 'save_marketing_params_in_order_meta');
